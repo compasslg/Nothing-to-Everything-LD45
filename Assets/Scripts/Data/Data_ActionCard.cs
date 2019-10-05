@@ -11,7 +11,7 @@ public class Data_ActionCard {
 	public readonly bool evasion;
 	public readonly int dmgBlock;
 	public Data_ActionCard(string cardName, Sprite icon, int manaCost, int enemyHPLoss, 
-	int enemyMPLoss, int selfHPRegen, int selfMPRegen, int evasion, int dmgBlock){
+	int enemyMPLoss, int selfHPRegen, int selfMPRegen, bool evasion, int dmgBlock){
 		this.cardName = cardName;
 		this.icon = icon;
 		this.manaCost = manaCost;
@@ -20,10 +20,25 @@ public class Data_ActionCard {
 		this.selfHPRegen = selfHPRegen;
 		this.selfMPRegen = selfMPRegen;
 		this.dmgBlock = dmgBlock;
-		if(evasion == 0){
-			this.evasion = false;
-		}else{
-			this.evasion = true;
+		this.evasion = evasion;
+		this.description = "";
+		if(enemyHPLoss > 0){
+			this.description += "Enemy HP -" + enemyHPLoss + "\n"; 
+		}
+		if(enemyMPLoss > 0){
+			this.description += "Enemy MP -" + enemyMPLoss + "\n";
+		}
+		if(selfHPRegen > 0){
+			this.description += "Self HP +" + enemyMPLoss + "\n";
+		}
+		if(selfMPRegen > 0){
+			this.description += "Self MP +" + enemyMPLoss + "\n";
+		}
+		if(evasion){
+			this.description += "Dodge next attack\n";
+		}
+		if(dmgBlock > 0){
+			this.description += "Next damage block: " + dmgBlock;
 		}
 	}
 }
