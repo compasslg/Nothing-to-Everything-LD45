@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using System.IO;
+using UnityEngine.SceneManagement;
 public class DeckManager : MonoBehaviour {
 	private int totalChance;
 	private List<int> chances;
@@ -13,13 +14,15 @@ public class DeckManager : MonoBehaviour {
 		instance = this;
 		LoadActionCards();
 		DontDestroyOnLoad(gameObject);
+		SceneManager.LoadScene("Title");
 	}
 	
 	// Update is called once per frame
 	void Update () {
 		
 	}
-	public Data_ActionCard DealActionCard(int roll){
+	public Data_ActionCard DealActionCard(){
+		int roll = UnityEngine.Random.Range(0, totalChance);
 		for(int i = 0; i < chances.Count; i++){
 			if(roll < chances[i]){
 				return actionCards[i];

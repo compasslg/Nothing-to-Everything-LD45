@@ -90,6 +90,8 @@ GameObject:
   - component: {fileID: 222853649160533406}
   - component: {fileID: 114295468014724324}
   - component: {fileID: 114455195180655606}
+  - component: {fileID: 114343435185060648}
+  - component: {fileID: 114898024868678792}
   m_Layer: 5
   m_Name: Action Card
   m_TagString: Untagged
@@ -218,6 +220,70 @@ MonoBehaviour:
   m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
+--- !u!114 &114343435185060648
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1524803933203290}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1862395651, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delegates:
+  - eventID: 0
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 114898024868678792}
+          m_MethodName: Scale
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+      m_TypeName: UnityEngine.EventSystems.EventTrigger+TriggerEvent, UnityEngine.UI,
+        Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+  - eventID: 1
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 114898024868678792}
+          m_MethodName: Unscale
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+      m_TypeName: UnityEngine.EventSystems.EventTrigger+TriggerEvent, UnityEngine.UI,
+        Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+  - eventID: 4
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 114455195180655606}
+          m_MethodName: Play
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+      m_TypeName: UnityEngine.EventSystems.EventTrigger+TriggerEvent, UnityEngine.UI,
+        Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+  delegates: []
 --- !u!114 &114455195180655606
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -229,10 +295,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0fc6aa7e619fb2f47b7276acea041b4c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardName: {fileID: 114254994709281130}
-  manaCost: {fileID: 114927046584141218}
-  icon: {fileID: 114830437408019488}
-  description: {fileID: 114916224939532036}
+  display:
+    cardName: {fileID: 114254994709281130}
+    manaCost: {fileID: 114927046584141218}
+    icon: {fileID: 114830437408019488}
+    description: {fileID: 114916224939532036}
+  interactable: 0
+  beingPlayed: 0
+  goingGrave: 0
+  playSpeed: 0
 --- !u!114 &114830437408019488
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -260,6 +331,20 @@ MonoBehaviour:
   m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
+--- !u!114 &114898024868678792
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1524803933203290}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3890198ad2efd394b9a8d5f811ee4c51, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scaleUp: 0
+  scaling: 0
+  scaleSpeed: 3
 --- !u!114 &114916224939532036
 MonoBehaviour:
   m_ObjectHideFlags: 1
