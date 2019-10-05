@@ -30,19 +30,6 @@ public class GameController : MonoBehaviour {
 		public BarRefresher hpBar;
 		public BarRefresher mpBar;
 	}
-/*
-	private class CardMotion{
-		public Transform onMotion;
-		public bool stayingCenter;
-		public bool goingCenter;
-		public bool goingGrave;
-		public float stayTime;
-		public float t;
-		public float motionSpeed;
-		public Vector3 initialPosition;
-		public Vector3 targetPosition;
-		public Transform targetParent;
-	} */
 	private class CardMotion{
 		public Transform onMotion;
 		public Vector3 initialPosition;
@@ -71,7 +58,7 @@ public class GameController : MonoBehaviour {
 		instance = this;
 		curState = GameState.DEAL_CARD;
 		motionQueue = new Queue<CardMotion>();
-		round = 1;
+		round = 0;
 		level = 1;
 	}
 	
@@ -85,6 +72,7 @@ public class GameController : MonoBehaviour {
 		text += "Round " + round + "\n";
 		switch(curState){
 			case GameState.DEAL_CARD:
+				round++;
 				text += "Card Dealing";
 				DealCard(0);
 				DealCard(1);
@@ -106,6 +94,8 @@ public class GameController : MonoBehaviour {
 				}
 				else if(enemy.hand.GetCardCount() == 0 || enemy.mp.GetValue() < enemy.hand.GetMinimumManaCost()){
 					curState = GameState.DEAL_CARD;
+				}else{
+					EnemyAI();
 				}
 				break;
 			case GameState.DEALING_MOTION:
@@ -135,10 +125,10 @@ public class GameController : MonoBehaviour {
 			if(target == 0){
 				actionCard.interactable = true;
 				MoveCard(cardObj, "PlayerHand", 2, 0.5f);
-				player.hand.AddCard(cardData);
+				player.hand.AddCard(actionCard);
 			}else{
 				MoveCard(cardObj, "EnemyHand", 2, 0.5f);
-				enemy.hand.AddCard(cardData);
+				enemy.hand.AddCard(actionCard);
 			}
 		}
 	}
@@ -173,12 +163,36 @@ public class GameController : MonoBehaviour {
 			}
 		}
 	}
-	public void PlayerPlay(ActionCard card){
-		if(curState == GameState.PLAYER_TURN){
-			MoveCardCenter(gameObject, 2, 0.8f);
-			MoveCard(gameObject, "Graveyard", 2, 0.5f);
-			player.mp.UpdateValue(-card.GetData().manaCost);
-			player.hand.RemoveCard(card.GetData());
+	public bool PlayerPlay(ActionCard card){
+		Data_ActionCard cardData = card.GetData();
+		if(curState == GameState.PLAYER_TURN && player.mp.GetValue() >= cardData.manaCost){
+			MoveCardCenter(card.gameObject, 2, 0.8f);
+			MoveCard(card.gameObject, "Graveyard", 2, 0.5f);
+			player.mp.UpdateValue(-cardData.manaCost);
+			player.hand.RemoveCard(card);
+			return true;
+		}
+		return false;
+	}
+	
+	public bool EnemyPlay(ActionCard card){
+		Data_ActionCard cardData = card.GetData();
+		if(curState == GameState.ENEMY_TURN && enemy.mp.GetValue() >= cardData.manaCost){
+			MoveCardCenter(card.gameObject, 2, 0.8f);
+			MoveCard(card.gameObject, "Graveyard", 2, 0.5f);
+			enemy.mp.UpdateValue(-cardData.manaCost);
+			enemy.hand.RemoveCard(card);
+			return true;
+		}
+		return false;
+	}
+
+	private void EnemyAI(){
+		List<ActionCard> cards = enemy.hand.GetAllCards();
+		foreach(ActionCard card in cards){
+			if(EnemyPlay(card)){
+				return;
+			}
 		}
 	}
 	public void MoveCardCenter(GameObject card, float motionSpeed, float stayTime){
@@ -216,47 +230,5 @@ public class GameController : MonoBehaviour {
 		cardMotion.stayTime = stayTime;
 		motionQueue.Enqueue(cardMotion);
 	}
-	
 
-	/*
-	public void CardMotionUpdate(){
-		
-		// moving to a target
-		if(cardMotion.t < 1){
-			if(cardMotion.stayingCenter){
-				cardMotion.t += Time.deltaTime / cardMotion.stayTime;				
-			}else{
-				cardMotion.t += Time.deltaTime * gameSpeed;
-				// Interporlation
-				cardMotion.onMotion.localPosition = (1-cardMotion.t) * cardMotion.initialPosition + cardMotion.t * cardMotion.targetPosition;
-			}
-		}
-		// change motion/target
-		else{
-			cardMotion.onMotion.localPosition = cardMotion.targetPosition;
-			cardMotion.t = 0;
-			
-			// From going center to staying in center
-			if(cardMotion.goingCenter){
-				cardMotion.goingCenter = false;
-				cardMotion.stayingCenter = true;
-				cardMotion.t = 0;
-			}
-			// From going grave to finish playing
-			else if(cardMotion.goingGrave){
-				cardMotion.goingGrave = false;
-				cardMotion.onMotion.SetParent(board.graveYard.transform);
-				cardMotion.onMotion = null;
-			}
-			// from staying in the center to going to the grave
-			else if(cardMotion.stayingCenter){
-				cardMotion.t = 0;
-				cardMotion.stayingCenter = false;
-				cardMotion.goingGrave = true;
-				cardMotion.initialPosition = transform.localPosition;
-				cardMotion.targetPosition = board.graveYard.transform.localPosition;
-			}
-		}
-
-	}*/
 }

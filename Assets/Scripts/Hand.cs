@@ -3,37 +3,32 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Hand : MonoBehaviour {
-	private List<Data_ActionCard> cards;
-	// Use this for initialization
-	void Start () {
-		cards = new List<Data_ActionCard>();
+	private List<ActionCard> cards;
+	void Start(){
+		cards = new List<ActionCard>();
 	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
-
-	public void AddCard(Data_ActionCard card){
-		if(cards == null){
-			cards = new List<Data_ActionCard>();
-		}
+	public void AddCard(ActionCard card){
+		cards = new List<ActionCard>();
 		cards.Add(card);
 	}
 	public int GetCardCount(){
 		return cards.Count;
 	}
-	public void RemoveCard(Data_ActionCard card){
+	public void RemoveCard(ActionCard card){
 		cards.Remove(card);
+	}
+	public List<ActionCard> GetAllCards(){
+		return cards;
 	}
 	public int GetMinimumManaCost(){
 		if(cards.Count == 0){
 			return 0;
 		}
-		int min = cards[0].manaCost;
-		foreach(Data_ActionCard card in cards){
-			if(card.manaCost < min){
-				min = card.manaCost;
+		int min = cards[0].GetData().manaCost;
+		foreach(ActionCard card in cards){
+			Data_ActionCard cardData = card.GetData();
+			if(cardData.manaCost < min){
+				min = cardData.manaCost;
 			}
 		}
 		return min;

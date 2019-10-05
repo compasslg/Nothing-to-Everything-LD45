@@ -15,9 +15,10 @@ public class ActionCard : MonoBehaviour{
 	[SerializeField]private UIDisplay display;
 	public Data_ActionCard data;
 	public bool interactable;
-
+	private Color defaultColor;
 	// Use this for initialization
 	void Start () {
+		defaultColor = GetComponent<Image>().color;
 	}
 	
 	// Update is called once per frame
@@ -35,8 +36,14 @@ public class ActionCard : MonoBehaviour{
 		return data;
 	}
 	public void Play(){
-		if(interactable){
-			GameController.instance.PlayerPlay(this);
+		if(!interactable){
+			return;
 		}
+		if(!GameController.instance.PlayerPlay(this)){
+			GetComponent<Image>().color = Color.red;
+		}
+	}
+	public void ReturnNormalColor(){
+		GetComponent<Image>().color = defaultColor;
 	}
 }
