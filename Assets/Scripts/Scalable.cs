@@ -6,10 +6,12 @@ public class Scalable : MonoBehaviour {
 	public bool scaleUp;
 	public bool scaling;
 	public float scaleSpeed;
+	public bool isScalable;
 	// Use this for initialization
 	void Start () {
 		scaleUp = false;
 		scaling = false;
+		isScalable = true;
 
 	}
 	

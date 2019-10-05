@@ -11,20 +11,8 @@ public class ActionCard : MonoBehaviour{
 		public Image icon;
 		public Text description;
 	}
-	[System.Serializable]
-	private class PlayMotion{
-		public bool beingPlayed;
-		public bool goingCenter;
-		public bool goingGrave;
-		public float moveSpeed;
-		public float stayTime;
-		public float t;
-		public Vector3 initialPosition;
-		public Vector3 motionVector;
-	}
 	
 	[SerializeField]private UIDisplay display;
-	[SerializeField]private PlayMotion playMotion;
 	public Data_ActionCard data;
 	public bool interactable;
 
@@ -34,30 +22,6 @@ public class ActionCard : MonoBehaviour{
 	
 	// Update is called once per frame
 	void Update () {
-		if(!playMotion.beingPlayed){
-			return;
-		}
-		if(playMotion.t < 1){
-			playMotion.t += playMotion.moveSpeed * Time.deltaTime;
-		}else{
-			gameObject.transform.localPosition = playMotion.initialPosition + playMotion.motionVector;
-			playMotion.t = 0;
-			
-			// From going center to staying in center
-			if(playMotion.goingCenter){
-				playMotion.goingCenter = false;
-			}
-			// From going grave to finish playing
-			else if(playMotion.goingGrave){
-				playMotion.goingGrave = false;
-				playMotion.beingPlayed = false;
-			}
-			// from staying in the center to going to the grave
-			else{
-				playMotion.goingGrave = true;
-				playMotion.initialPosition = transform.localPosition;
-			}
-		}
 	}
 
 	public void SetData(Data_ActionCard data){
@@ -69,10 +33,8 @@ public class ActionCard : MonoBehaviour{
 	}
 	public void Play(){
 		if(interactable && GameController.instance.curState == GameController.GameState.PLAY){
-			gameObject.transform.SetParent(GameController.instance.transform);
-			playMotion.initialPosition = gameObject.transform.localPosition;
-			playMotion.motionVector = new Vector3() - this.transform.localPosition;
-			playMotion.t = 0;
+			GameController.instance.MoveCard(gameObject, new Vector3(0, 0, 0), 2, 0.8f);
+			GameController.instance.MoveCard(gameObject, "Graveyard", 2, 0.5f);
 		}
 	}
 }
