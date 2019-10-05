@@ -301,9 +301,6 @@ MonoBehaviour:
     icon: {fileID: 114830437408019488}
     description: {fileID: 114916224939532036}
   interactable: 0
-  beingPlayed: 0
-  goingGrave: 0
-  playSpeed: 0
 --- !u!114 &114830437408019488
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -345,6 +342,7 @@ MonoBehaviour:
   scaleUp: 0
   scaling: 0
   scaleSpeed: 3
+  isScalable: 0
 --- !u!114 &114916224939532036
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -521,8 +519,8 @@ RectTransform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 140, y: 180}
   m_Pivot: {x: 0.5, y: 0.5}

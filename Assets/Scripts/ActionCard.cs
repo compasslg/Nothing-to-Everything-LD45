@@ -31,10 +31,12 @@ public class ActionCard : MonoBehaviour{
 		display.icon.sprite = data.icon;
 		display.description.text = data.description;
 	}
+	public Data_ActionCard GetData(){
+		return data;
+	}
 	public void Play(){
-		if(interactable && GameController.instance.curState == GameController.GameState.PLAY){
-			GameController.instance.MoveCard(gameObject, new Vector3(0, 0, 0), 2, 0.8f);
-			GameController.instance.MoveCard(gameObject, "Graveyard", 2, 0.5f);
+		if(interactable){
+			GameController.instance.PlayerPlay(this);
 		}
 	}
 }
