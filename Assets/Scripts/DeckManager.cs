@@ -50,8 +50,8 @@ public class DeckManager : MonoBehaviour {
 		int block = 0;
         while(!reader.EndOfStream){
             line = reader.ReadLine().Split('\t');
-			//Sprite icon = Resources.Load<Sprite>("Sprites/" + line[0] + ".png");
-			Sprite icon = Resources.Load<Sprite>("Sprites/white.png");
+			Sprite icon = Resources.Load<Sprite>("Sprites/" + line[0]);
+			//Sprite icon = Resources.Load<Sprite>("Sprites/white.png");
 			totalChance += Convert.ToInt32(line[3]);
 			manaCost = Convert.ToInt32(line[2]);
 			enemyHPLoss = Convert.ToInt32(line[4]);
