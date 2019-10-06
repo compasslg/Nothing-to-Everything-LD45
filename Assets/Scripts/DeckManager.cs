@@ -63,7 +63,7 @@ public class DeckManager : MonoBehaviour {
 			}else{
 				evasion = true;
 			}
-			Data_ActionCard card = new Data_ActionCard(line[0],icon,manaCost,enemyHPLoss,enemyMPLoss,selfHPRegen,selfMPRegen, evasion, block);
+			Data_ActionCard card = new Data_ActionCard(line[0],icon, line[1], manaCost,enemyHPLoss,enemyMPLoss,selfHPRegen,selfMPRegen, evasion, block);
 			actionCards.Add(card);
 			chances.Add(totalChance);
 		}

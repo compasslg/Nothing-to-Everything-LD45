@@ -8,7 +8,6 @@ public class Hand : MonoBehaviour {
 		cards = new List<ActionCard>();
 	}
 	public void AddCard(ActionCard card){
-		cards = new List<ActionCard>();
 		cards.Add(card);
 	}
 	public int GetCardCount(){

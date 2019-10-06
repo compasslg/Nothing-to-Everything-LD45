@@ -22,13 +22,8 @@ public class GameController : MonoBehaviour {
 		public Stat hp, mp;
 		public BarRefresher hpBar;
 		public BarRefresher mpBar;
-	}
-	[System.Serializable]
-	private class Enemy{
-		public Hand hand;
-		public Stat hp, mp;
-		public BarRefresher hpBar;
-		public BarRefresher mpBar;
+		public bool dodge;
+		public int dmgBlock;
 	}
 	private class CardMotion{
 		public Transform onMotion;
@@ -38,19 +33,20 @@ public class GameController : MonoBehaviour {
 		public float t;
 		public float motionSpeed;
 		public float stayTime;
+		public bool applyEffect;
 	}
 	public float gameSpeed;
 	[SerializeField]private Board board;
 	[SerializeField]private Player player;
-	[SerializeField]private Enemy enemy;
+	[SerializeField]private Player enemy;
 	private Queue<CardMotion> motionQueue;
 	// Use this for initialization
 	void Start () {
-		player.hp = new Stat("HP", 10, true);
+		player.hp = new Stat("HP", 100, true);
 		player.mp = new Stat("MP", 10, true);
 		player.hpBar.SetStat(player.hp);
 		player.mpBar.SetStat(player.mp);
-		enemy.hp = new Stat("HP", 10, true);
+		enemy.hp = new Stat("HP", 100, true);
 		enemy.mp = new Stat("MP", 10, true);
 		enemy.hpBar.SetStat(enemy.hp);
 		enemy.mpBar.SetStat(enemy.mp);
@@ -110,12 +106,15 @@ public class GameController : MonoBehaviour {
 
 		
 	public void DealCard(int target){
-		int count = 0;
+		int count = Mathf.Min(round, 4);
 		if(target == 0){
-			count = round  - player.hand.GetCardCount() - 1;
+			count -= player.hand.GetCardCount() + 1;
+			//Debug.Log("Player " + target + " has " + player.hand.GetCardCount() + "cards.");
 		}else{
-			count = round - enemy.hand.GetCardCount();
+			count -= enemy.hand.GetCardCount();
+			//Debug.Log("Player " + target + " has " + enemy.hand.GetCardCount() + "cards.");
 		}
+		Debug.Log("Deal " + count + " cards to Player " + target);
 		for(int i = 0; i < count; i++){
 			GameObject cardObj = Instantiate(board.actionCardPrefab, board.deck.transform);
 			Data_ActionCard cardData = DeckManager.instance.DealActionCard();
@@ -125,10 +124,12 @@ public class GameController : MonoBehaviour {
 			if(target == 0){
 				actionCard.interactable = true;
 				MoveCard(cardObj, "PlayerHand", 2, 0.5f);
+				Debug.Log("Player has " + enemy.hand.GetCardCount() + " cards");
 				player.hand.AddCard(actionCard);
 			}else{
 				MoveCard(cardObj, "EnemyHand", 2, 0.5f);
 				enemy.hand.AddCard(actionCard);
+				Debug.Log("Enemy has " + enemy.hand.GetCardCount() + " cards");
 			}
 		}
 	}
@@ -150,6 +151,39 @@ public class GameController : MonoBehaviour {
 		}
 		// end motion
 		else{
+			if(cardMotion.applyEffect){
+				Data_ActionCard card = cardMotion.onMotion.GetComponent<ActionCard>().GetData();
+				Player cardUser, opponent;
+				if(curState == GameState.PLAYER_TURN){
+					cardUser = player;
+					opponent = enemy;
+				}else{
+					cardUser = enemy;
+					opponent = player;
+				}
+				// apply effect
+				if(card.cardType.Equals("Offense")){
+					if(opponent.dodge){
+						opponent.dodge = false;
+					}else if(opponent.dmgBlock > 0){
+						int nextDmg = card.enemyHPLoss - enemy.dmgBlock;
+						if(nextDmg < 0){
+							nextDmg = 0;
+						}
+						opponent.hp.UpdateValue(-nextDmg);
+						opponent.mp.UpdateValue(-card.enemyMPLoss);
+					}else{
+						opponent.hp.UpdateValue(-card.enemyHPLoss);
+						opponent.mp.UpdateValue(-card.enemyMPLoss);
+					}
+				}else{
+					cardUser.hp.UpdateValue(card.selfHPRegen);
+					cardUser.mp.UpdateValue(card.selfMPRegen);
+					cardUser.dodge = card.evasion;
+					cardUser.dmgBlock = card.dmgBlock;
+				}
+				
+			}
 			if(cardMotion.targetParent != null){
 				cardMotion.onMotion.SetParent(cardMotion.targetParent);
 			}
@@ -166,10 +200,11 @@ public class GameController : MonoBehaviour {
 	public bool PlayerPlay(ActionCard card){
 		Data_ActionCard cardData = card.GetData();
 		if(curState == GameState.PLAYER_TURN && player.mp.GetValue() >= cardData.manaCost){
-			MoveCardCenter(card.gameObject, 2, 0.8f);
+			MoveCardCenter(card.gameObject, 2, 0.8f, true);
 			MoveCard(card.gameObject, "Graveyard", 2, 0.5f);
 			player.mp.UpdateValue(-cardData.manaCost);
 			player.hand.RemoveCard(card);
+			Debug.Log("You use '" + card.GetData().cardName + "', \nand he now has "  + player.hand.GetCardCount() + " cards.");
 			return true;
 		}
 		return false;
@@ -178,7 +213,7 @@ public class GameController : MonoBehaviour {
 	public bool EnemyPlay(ActionCard card){
 		Data_ActionCard cardData = card.GetData();
 		if(curState == GameState.ENEMY_TURN && enemy.mp.GetValue() >= cardData.manaCost){
-			MoveCardCenter(card.gameObject, 2, 0.8f);
+			MoveCardCenter(card.gameObject, 2, 0.8f, true);
 			MoveCard(card.gameObject, "Graveyard", 2, 0.5f);
 			enemy.mp.UpdateValue(-cardData.manaCost);
 			enemy.hand.RemoveCard(card);
@@ -191,11 +226,12 @@ public class GameController : MonoBehaviour {
 		List<ActionCard> cards = enemy.hand.GetAllCards();
 		foreach(ActionCard card in cards){
 			if(EnemyPlay(card)){
-				return;
+				Debug.Log("Enemy use '" + card.GetData().cardName + "', \nand he now has "  + cards.Count + " cards.");
+				break; 
 			}
 		}
 	}
-	public void MoveCardCenter(GameObject card, float motionSpeed, float stayTime){
+	public void MoveCardCenter(GameObject card, float motionSpeed, float stayTime, bool applyEffect){
 		CardMotion cardMotion = new CardMotion();
 		card.SetActive(true);
 		card.transform.SetParent(board.background.transform);
@@ -206,7 +242,7 @@ public class GameController : MonoBehaviour {
 		cardMotion.t = 0;
 		cardMotion.motionSpeed = motionSpeed;
 		cardMotion.stayTime = stayTime;
-		Debug.Log(card.transform.position);
+		cardMotion.applyEffect = applyEffect;
 		motionQueue.Enqueue(cardMotion);
 	}
 	public void MoveCard(GameObject card, string targetName, float motionSpeed, float stayTime){
@@ -228,6 +264,7 @@ public class GameController : MonoBehaviour {
 		cardMotion.t = 0;
 		cardMotion.motionSpeed = motionSpeed;
 		cardMotion.stayTime = stayTime;
+		cardMotion.applyEffect = false;
 		motionQueue.Enqueue(cardMotion);
 	}
 
