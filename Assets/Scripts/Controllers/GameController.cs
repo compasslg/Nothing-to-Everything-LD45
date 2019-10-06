@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 public class GameController : MonoBehaviour {
-	public enum GameState{DEAL_CARD, DEALING_MOTION, PLAYER_TURN, PLAYER_MOTION, ENEMY_TURN, ENEMY_MOTION, NEXTLEVEL, GAMEOVER};
+	public enum GameState{DEAL_CARD, DEALING_MOTION, PLAYER_TURN, PLAYER_MOTION, ENEMY_TURN, ENEMY_MOTION, NEXTLEVEL, GAMEOVER, VICTORY};
 	private int round;
 	private int level;
 	public static GameController instance;
@@ -39,22 +40,22 @@ public class GameController : MonoBehaviour {
 	}
 	public float gameSpeed;
 	[SerializeField]private Board board;
-	[SerializeField]private Player player;
-	[SerializeField]private Player enemy;
+	[SerializeField]private Player player, enemy;
 	[SerializeField]private GameObject thingPanel;
 	[SerializeField]private Thing thing;
 	[SerializeField]private Image nextLevelBlock;
 	[SerializeField]private Text nextLevelText;
 	[SerializeField]private GameObject endTurnButton;
+	[SerializeField]private CanvasGroup victoryPanel, gameOverPanel;
 	private Queue<CardMotion> motionQueue;
 	// Use this for initialization
 	void Start () {
-		player.hp = new Stat("HP", 100, true);
-		player.mp = new Stat("MP", 10, true);
+		player.hp = new Stat("HP", 20, true);
+		player.mp = new Stat("MP", 7, true);
 		player.hpBar.SetStat(player.hp);
 		player.mpBar.SetStat(player.mp);
-		enemy.hp = new Stat("HP", 1, true);
-		enemy.mp = new Stat("MP", 10, true);
+		enemy.hp = new Stat("HP", 14, true);
+		enemy.mp = new Stat("MP", 7, true);
 		enemy.hpBar.SetStat(enemy.hp);
 		enemy.mpBar.SetStat(enemy.mp);
 		
@@ -88,8 +89,8 @@ public class GameController : MonoBehaviour {
 				}else{
 					thing.SetData("Nothing", "There is nothing you can do with this card.");
 				}
-				player.mp.UpdateValue(6);
-				enemy.mp.UpdateValue(6);
+				player.mp.UpdateValue(5);
+				enemy.mp.UpdateValue(5);
 
 				text += "Card Dealing";
 				DealCard(0);
@@ -99,6 +100,11 @@ public class GameController : MonoBehaviour {
 			case GameState.PLAYER_TURN:
 				text += "Your Turn";
 				if(enemy.hp.GetValue() <= 0){
+					if(level == 10){
+						victoryPanel.gameObject.SetActive(true);
+						curState = GameState.VICTORY;
+						return;
+					}
 					curState = GameState.NEXTLEVEL;
 					StartCoroutine(NextLevelUpdate());
 				}else{
@@ -109,6 +115,7 @@ public class GameController : MonoBehaviour {
 				text += "Enemy Turn";
 				if(player.hp.GetValue() <= 0){
 					curState = GameState.GAMEOVER;
+					gameOverPanel.gameObject.SetActive(true);
 				}
 				else if(enemy.hand.GetCardCount() == 0 || enemy.mp.GetValue() < enemy.hand.GetMinimumManaCost()){
 					curState = GameState.DEAL_CARD;
@@ -121,6 +128,11 @@ public class GameController : MonoBehaviour {
 				break;
 			case GameState.GAMEOVER:
 				text += "Game Over";
+				gameOverPanel.alpha += gameSpeed * Time.deltaTime;
+				break;
+			case GameState.VICTORY:
+				text += "Victory";
+				victoryPanel.alpha += gameSpeed * Time.deltaTime;
 				break;
 		}
 		board.infoArea.text = text;
@@ -169,6 +181,12 @@ public class GameController : MonoBehaviour {
 		}
 	}
 	private void ClearTarget(Player target){
+		int extraHealth = level * 4;
+		if(target == player){
+			extraHealth += 6;
+		}
+		target.hp.SetBestValue(10 + extraHealth);
+		target.mp.SetBestValue(6 + level);
 		target.hp.SetValue(target.hp.GetBestValue());
 		target.mp.SetValue(target.mp.GetBestValue());
 		target.dodge = false;
@@ -261,8 +279,12 @@ public class GameController : MonoBehaviour {
 				}else{
 					cardUser.hp.UpdateValue(card.selfHPRegen);
 					cardUser.mp.UpdateValue(card.selfMPRegen);
-					cardUser.dodge = card.evasion;
-					cardUser.dmgBlock = card.dmgBlock;
+					if(!cardUser.dodge){
+						cardUser.dodge = card.evasion;
+					}
+					if(cardUser.dmgBlock <= 0){
+						cardUser.dmgBlock = card.dmgBlock;
+					}
 				}
 				
 				UpdateStatusInfo(enemy);
@@ -293,6 +315,7 @@ public class GameController : MonoBehaviour {
 		}
 		Data_ActionCard cardData = card.GetData();
 		if(curState == GameState.PLAYER_TURN && player.mp.GetValue() >= cardData.manaCost){
+			card.interactable = false;
 			MoveCardCenter(card.gameObject, 2, 0.8f, true);
 			MoveCard(card.gameObject, "Graveyard", 2, 0.5f);
 			player.mp.UpdateValue(-cardData.manaCost);
@@ -379,6 +402,8 @@ public class GameController : MonoBehaviour {
 		playerCards.Remove(playerCard);
 		enemyCards.Add(playerCard);
 		playerCards.Add(enemyCard);
+		enemyCard.interactable = true;
+		playerCard.interactable = false;
 		MoveCard(enemyCard.gameObject, "PlayerHand", 3, 0);
 		MoveCard(playerCard.gameObject, "EnemyHand", 3, 0);
 		return true;
@@ -406,6 +431,7 @@ public class GameController : MonoBehaviour {
 		}
 		ActionCard enemyCard = enemyCards[Random.Range(0, enemyCards.Count)];
 		enemyCards.Remove(enemyCard);
+		enemyCard.interactable = true;
 		MoveCard(enemyCard.gameObject, "PlayerHand", 3, 0);
 		player.hand.AddCard(enemyCard);
 	}
@@ -428,4 +454,8 @@ public class GameController : MonoBehaviour {
 		MoveCard(card.gameObject, "Graveyard", 3, 0.5f);
 		DealCard(0);
 	}
+	public void TitleScreen(){
+		SceneManager.LoadScene("Title");
+	}
+	
 }

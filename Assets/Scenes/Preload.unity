@@ -226,7 +226,7 @@ MonoBehaviour:
     description: Replace one of your card with a new one from deck.
   - name: Destroy a Thing
     description: Destroy one of your enemy's cards.
-  - name: Nothing for the Enemy
+  - name: Nothing for Enemy
     description: Destroy all cards in your enemy's hand.
   - name: Steal a Thing
     description: Steal a card from your enemy.
