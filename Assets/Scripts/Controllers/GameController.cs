@@ -45,6 +45,7 @@ public class GameController : MonoBehaviour {
 	[SerializeField]private Thing thing;
 	[SerializeField]private Image nextLevelBlock;
 	[SerializeField]private Text nextLevelText;
+	[SerializeField]private GameObject endTurnButton;
 	private Queue<CardMotion> motionQueue;
 	// Use this for initialization
 	void Start () {
@@ -68,6 +69,7 @@ public class GameController : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		if(motionQueue.Count > 0){
+			endTurnButton.SetActive(false);
 			CardMotionUpdate();
 			return;
 		}
@@ -78,6 +80,14 @@ public class GameController : MonoBehaviour {
 			case GameState.DEAL_CARD:
 				round++;
 				// default mana regen
+				if(level > 2){
+					thing.SetData("Anything", "You can choose any thing you want.");
+				}
+				else if(level > 1){
+					thing.SetData("Something", "Get a random thing.");
+				}else{
+					thing.SetData("Nothing", "There is nothing you can do with this card.");
+				}
 				player.mp.UpdateValue(6);
 				enemy.mp.UpdateValue(6);
 
@@ -91,9 +101,8 @@ public class GameController : MonoBehaviour {
 				if(enemy.hp.GetValue() <= 0){
 					curState = GameState.NEXTLEVEL;
 					StartCoroutine(NextLevelUpdate());
-				}
-				else if(player.hand.GetCardCount() == 0 || player.mp.GetValue() < player.hand.GetMinimumManaCost()){
-					curState = GameState.ENEMY_TURN;
+				}else{
+					endTurnButton.SetActive(true);
 				}
 				break;
 			case GameState.ENEMY_TURN:
@@ -137,6 +146,7 @@ public class GameController : MonoBehaviour {
 		ClearGraveyard();
 		ClearTarget(player);
 		ClearTarget(enemy);
+		thing.interactable = true;
 		yield return new WaitForSeconds(0.5f);
 		float t1 = 0;
 		while(t1 < 1){
@@ -148,7 +158,6 @@ public class GameController : MonoBehaviour {
 			nextLevelText.color = (1 - t1) * Color.clear + Color.clear;
 			yield return new WaitForSeconds(0.05f);
 		}
-		Debug.Log("here");
 		nextLevelBlock.gameObject.SetActive(false);
 		nextLevelText.gameObject.SetActive(false);
 		curState = GameState.DEAL_CARD;
@@ -272,7 +281,16 @@ public class GameController : MonoBehaviour {
 			}
 		}
 	}
+	public void EndTurn(){
+		if(curState == GameState.PLAYER_TURN){
+			curState = GameState.ENEMY_TURN;
+		}
+		endTurnButton.SetActive(false);
+	}
 	public bool PlayerPlay(ActionCard card){
+		if(thingPanel.activeSelf){
+			return false;
+		}
 		Data_ActionCard cardData = card.GetData();
 		if(curState == GameState.PLAYER_TURN && player.mp.GetValue() >= cardData.manaCost){
 			MoveCardCenter(card.gameObject, 2, 0.8f, true);

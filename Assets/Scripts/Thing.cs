@@ -20,9 +20,8 @@ public class Thing : MonoBehaviour {
 				break;
 			case "Something":
 				DeckManager.Data_Thing thing = DeckManager.instance.GetRandomThing();
-				// recursive call (at most once) to get a random Thing
-				Use();
-				break;
+				SetData(thing.name, thing.description);
+				return;
 			case "Anything":
 				GameController.instance.ActivateThingPanel(true);
 				break;
@@ -34,19 +33,20 @@ public class Thing : MonoBehaviour {
 				return;
 			case "Replace a Thing":
 				GameController.instance.ReplaceAThing();
-				return;
+				break;
 			case "Steal a Thing":
 				GameController.instance.StealAThing();
-				return;
+				break;
 			case "Destroy a Thing":
 				GameController.instance.DestroyAThing();
-				return;
+				break;
 			case "Nothing for Enemy":
 				GameController.instance.NothingForEnemy();
-				return;
+				break;
 		}
 		display.cardName.text = "Nothing";
 		display.description.text = "There is nothing you can do with this card.";
+		interactable = false;
 	}
 	
 	public void SetData(string name, string description){
