@@ -73,6 +73,7 @@ public class DeckManager : MonoBehaviour {
 			enemyMPLoss = Convert.ToInt32(line[5]);
 			selfHPRegen = Convert.ToInt32(line[6]);
 			selfMPRegen = Convert.ToInt32(line[7]);
+			block = Convert.ToInt32(line[9]);
 			if(Convert.ToInt32(line[8]) == 0){
 				evasion = false;
 			}else{

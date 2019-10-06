@@ -25,6 +25,7 @@ public class GameController : MonoBehaviour {
 		public BarRefresher mpBar;
 		public bool dodge;
 		public int dmgBlock;
+		public Text statusInfo;
 	}
 	private class CardMotion{
 		public Transform onMotion;
@@ -76,7 +77,7 @@ public class GameController : MonoBehaviour {
 				// default mana regen
 				player.mp.UpdateValue(6);
 				enemy.mp.UpdateValue(6);
-				
+
 				text += "Card Dealing";
 				DealCard(0);
 				DealCard(1);
@@ -112,7 +113,16 @@ public class GameController : MonoBehaviour {
 		board.infoArea.text = text;
 	}
 
-	
+	private void UpdateStatusInfo(Player target){
+		string text = "";
+		if(target.dodge){
+			text += "Dodge next attack.\n";
+		}
+		if(target.dmgBlock > 0){
+			text += "Block " + target.dmgBlock + " damage.";
+		}
+		target.statusInfo.text = text;
+	}
 	public void DealCard(int target){
 		int count = Mathf.Min(round, 4);
 		if(target == 0){
@@ -174,7 +184,8 @@ public class GameController : MonoBehaviour {
 					if(opponent.dodge){
 						opponent.dodge = false;
 					}else if(opponent.dmgBlock > 0){
-						int nextDmg = card.enemyHPLoss - enemy.dmgBlock;
+						int nextDmg = card.enemyHPLoss - opponent.dmgBlock;
+						opponent.dmgBlock = 0;
 						if(nextDmg < 0){
 							nextDmg = 0;
 						}
@@ -191,6 +202,8 @@ public class GameController : MonoBehaviour {
 					cardUser.dmgBlock = card.dmgBlock;
 				}
 				
+				UpdateStatusInfo(enemy);
+				UpdateStatusInfo(player);
 			}
 			if(cardMotion.targetParent != null){
 				cardMotion.onMotion.SetParent(cardMotion.targetParent);
@@ -242,6 +255,7 @@ public class GameController : MonoBehaviour {
 	public void MoveCardCenter(GameObject card, float motionSpeed, float stayTime, bool applyEffect){
 		CardMotion cardMotion = new CardMotion();
 		card.SetActive(true);
+		card.GetComponent<Scalable>().isScalable = false;
 		card.transform.SetParent(board.background.transform);
 		cardMotion.onMotion = card.transform;
 		cardMotion.targetPosition = board.background.transform.position;

@@ -1671,12 +1671,14 @@ MonoBehaviour:
     mpBar: {fileID: 834516814}
     dodge: 0
     dmgBlock: 0
+    statusInfo: {fileID: 857053931}
   enemy:
     hand: {fileID: 226423586}
     hpBar: {fileID: 1004966321}
     mpBar: {fileID: 1846079814}
     dodge: 0
     dmgBlock: 0
+    statusInfo: {fileID: 1280850525}
   thingPanel: {fileID: 446607533}
   thing: {fileID: 44684191}
 --- !u!1 &1203101997
@@ -2297,15 +2299,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.35686275, g: 0.35686275, b: 0.35686275, a: 1}
+  m_Color: {r: 0.8113208, g: 0.8113208, b: 0.8113208, a: 1}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 0}
-  m_Type: 0
+  m_Sprite: {fileID: 21300000, guid: e0fa0324db6072641a0eeb986a4d7607, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
