@@ -32,4 +32,13 @@ public class Hand : MonoBehaviour {
 		}
 		return min;
 	}
+	public void ClearHand(){
+		if(cards == null){
+			return;
+		}
+		cards.Clear();
+		for(int i = 0; i < transform.childCount; i++){
+			Destroy(transform.GetChild(i).gameObject);
+		}
+	}
 }

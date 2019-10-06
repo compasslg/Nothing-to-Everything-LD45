@@ -52,16 +52,17 @@ public class GameController : MonoBehaviour {
 		player.mp = new Stat("MP", 10, true);
 		player.hpBar.SetStat(player.hp);
 		player.mpBar.SetStat(player.mp);
-		enemy.hp = new Stat("HP", 100, true);
+		enemy.hp = new Stat("HP", 1, true);
 		enemy.mp = new Stat("MP", 10, true);
 		enemy.hpBar.SetStat(enemy.hp);
 		enemy.mpBar.SetStat(enemy.mp);
 		
 		instance = this;
-		curState = GameState.DEAL_CARD;
+		curState = GameState.NEXTLEVEL;
 		motionQueue = new Queue<CardMotion>();
 		round = 0;
-		level = 1;
+		level = 0;
+		StartCoroutine(NextLevelUpdate());
 	}
 	
 	// Update is called once per frame
@@ -89,6 +90,7 @@ public class GameController : MonoBehaviour {
 				text += "Your Turn";
 				if(enemy.hp.GetValue() <= 0){
 					curState = GameState.NEXTLEVEL;
+					StartCoroutine(NextLevelUpdate());
 				}
 				else if(player.hand.GetCardCount() == 0 || player.mp.GetValue() < player.hand.GetMinimumManaCost()){
 					curState = GameState.ENEMY_TURN;
@@ -117,23 +119,28 @@ public class GameController : MonoBehaviour {
 
 
 	IEnumerator NextLevelUpdate(){
+		level++;
+		round = 0;
 		nextLevelBlock.gameObject.SetActive(true);
 		nextLevelText.gameObject.SetActive(true);
-		bool wait = true;
+		nextLevelText.text = "Level " + level;
 		float t0 = 0;
-		while(t0 < 1){
-			t0 += 0.05f;
+		while(t0 < 1 && level != 1){
+			t0 += 0.05f * gameSpeed;
 			if(t0 > 1){
 				t0 = 1;
 			}
-			nextLevelBlock.color = (1 - t0) * Color.clear + Color.white;
-			nextLevelText.color = (1 - t0) * Color.clear + Color.white;
+			nextLevelBlock.color = (1 - t0) * Color.clear + t0 * Color.white;
+			nextLevelText.color = (1 - t0) * Color.clear + t0 * Color.white;
 			yield return new WaitForSeconds(0.05f);
 		}
+		ClearGraveyard();
+		ClearTarget(player);
+		ClearTarget(enemy);
 		yield return new WaitForSeconds(0.5f);
 		float t1 = 0;
 		while(t1 < 1){
-			t1 += 0.05f;
+			t1 += 0.05f * gameSpeed;
 			if(t1 > 1){
 				t1 = 1;
 			}
@@ -141,12 +148,25 @@ public class GameController : MonoBehaviour {
 			nextLevelText.color = (1 - t1) * Color.clear + Color.clear;
 			yield return new WaitForSeconds(0.05f);
 		}
-		
+		Debug.Log("here");
+		nextLevelBlock.gameObject.SetActive(false);
+		nextLevelText.gameObject.SetActive(false);
+		curState = GameState.DEAL_CARD;
 
 	}
-
-
-
+	private void ClearGraveyard(){
+		for(int i = 0; i < board.graveYard.transform.childCount; i++){
+			Destroy(board.graveYard.transform.GetChild(i).gameObject);
+		}
+	}
+	private void ClearTarget(Player target){
+		target.hp.SetValue(target.hp.GetBestValue());
+		target.mp.SetValue(target.mp.GetBestValue());
+		target.dodge = false;
+		target.dmgBlock = 0;
+		target.statusInfo.text = "";
+		target.hand.ClearHand();
+	}
 	private void UpdateStatusInfo(Player target){
 		string text = "";
 		if(target.dodge){
