@@ -5,9 +5,20 @@ using System;
 using System.IO;
 using UnityEngine.SceneManagement;
 public class DeckManager : MonoBehaviour {
+	[Serializable]
+	public class Data_Thing{
+		public string name;
+		public string description;
+	}
+	[Serializable]
+	public class Data_ThingCard{
+		public string name;
+		public string description;
+	}
 	private int totalChance;
 	private List<int> chances;
 	private List<Data_ActionCard> actionCards;
+	public List<Data_Thing> things;
 	public static DeckManager instance;
 	// Use this for initialization
 	void Start () {
@@ -20,6 +31,10 @@ public class DeckManager : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		
+	}
+	public Data_Thing GetRandomThing(){
+		int index = UnityEngine.Random.Range(0, things.Count);
+		return things[index];
 	}
 	public Data_ActionCard DealActionCard(){
 		int roll = UnityEngine.Random.Range(0, totalChance);

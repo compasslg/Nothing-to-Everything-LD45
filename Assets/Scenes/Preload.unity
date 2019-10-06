@@ -217,6 +217,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05169047f985aec4aa44a69a313b3835, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  things:
+  - name: Get a Thing
+    description: Get an extra card.
+  - name: Swap a Thing
+    description: Swap a card with your enemy.
+  - name: Replace a Thing
+    description: Replace one of your card with a new one from deck.
+  - name: Destroy a Thing
+    description: Destroy one of your enemy's cards.
+  - name: Nothing for the Enemy
+    description: Destroy all cards in your enemy's hand.
+  - name: Steal a Thing
+    description: Steal a card from your enemy.
 --- !u!4 &1285926331
 Transform:
   m_ObjectHideFlags: 0

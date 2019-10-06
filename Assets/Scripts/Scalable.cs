@@ -3,20 +3,22 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Scalable : MonoBehaviour {
-	public bool scaleUp;
-	public bool scaling;
+	private bool scaleUp;
+	private bool scaling;
 	public float scaleSpeed;
 	public bool isScalable;
 	// Use this for initialization
 	void Start () {
 		scaleUp = false;
 		scaling = false;
-		isScalable = true;
-
 	}
 	
 	// Update is called once per frame
 	void Update () {
+		if(isScalable == false){
+			transform.localScale = new Vector3(1,1,1);
+			return;
+		}
 		if(scaling == false){
 			return;
 		}

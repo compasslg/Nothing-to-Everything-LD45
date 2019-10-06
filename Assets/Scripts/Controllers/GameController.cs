@@ -14,6 +14,7 @@ public class GameController : MonoBehaviour {
 		public GameObject deck;
 		public GameObject graveYard;
 		public Text infoArea;
+		public Text thingInfoArea;
 		public GameObject actionCardPrefab;
 	}
 	[System.Serializable]
@@ -39,6 +40,8 @@ public class GameController : MonoBehaviour {
 	[SerializeField]private Board board;
 	[SerializeField]private Player player;
 	[SerializeField]private Player enemy;
+	[SerializeField]private GameObject thingPanel;
+	[SerializeField]private Thing thing;
 	private Queue<CardMotion> motionQueue;
 	// Use this for initialization
 	void Start () {
@@ -64,11 +67,16 @@ public class GameController : MonoBehaviour {
 			CardMotionUpdate();
 			return;
 		}
+		board.thingInfoArea.text = "";
 		string text = "Level " + level + "\n";
 		text += "Round " + round + "\n";
 		switch(curState){
 			case GameState.DEAL_CARD:
 				round++;
+				// default mana regen
+				player.mp.UpdateValue(6);
+				enemy.mp.UpdateValue(6);
+				
 				text += "Card Dealing";
 				DealCard(0);
 				DealCard(1);
@@ -104,7 +112,7 @@ public class GameController : MonoBehaviour {
 		board.infoArea.text = text;
 	}
 
-		
+	
 	public void DealCard(int target){
 		int count = Mathf.Min(round, 4);
 		if(target == 0){
@@ -268,4 +276,70 @@ public class GameController : MonoBehaviour {
 		motionQueue.Enqueue(cardMotion);
 	}
 
+
+	public void ActivateThingPanel(bool active){
+		thingPanel.SetActive(active);
+	}
+	public bool SwapAThing(){
+		board.thingInfoArea.text = "Swap a Thing";
+		List<ActionCard> enemyCards = enemy.hand.GetAllCards();
+		List<ActionCard> playerCards = player.hand.GetAllCards();
+		if(playerCards.Count == 0 || enemyCards.Count == 0){
+			return false;
+		}
+		ActionCard enemyCard = enemyCards[Random.Range(0, enemyCards.Count)];
+		ActionCard playerCard = playerCards[Random.Range(0, playerCards.Count)];
+		enemyCards.Remove(enemyCard);
+		playerCards.Remove(playerCard);
+		enemyCards.Add(playerCard);
+		playerCards.Add(enemyCard);
+		MoveCard(enemyCard.gameObject, "PlayerHand", 3, 0);
+		MoveCard(playerCard.gameObject, "EnemyHand", 3, 0);
+		return true;
+	}
+	public void DestroyAThing(){
+		board.thingInfoArea.text = "Destroy a Thing";
+		List<ActionCard> enemyCards = enemy.hand.GetAllCards();
+		if(enemyCards.Count == 0){
+			return;
+		}
+		ActionCard enemyCard = enemyCards[Random.Range(0, enemyCards.Count)];
+		enemyCards.Remove(enemyCard);
+		MoveCard(enemyCard.gameObject, "Graveyard", 3, 0.5f);
+
+	}
+	public void GetAThing(){
+		board.thingInfoArea.text = "Get a Thing";
+		DealCard(0);
+	}
+	public void StealAThing(){
+		board.thingInfoArea.text = "Steal a Thing";
+		List<ActionCard> enemyCards = enemy.hand.GetAllCards();
+		if(enemyCards.Count == 0){
+			return;
+		}
+		ActionCard enemyCard = enemyCards[Random.Range(0, enemyCards.Count)];
+		enemyCards.Remove(enemyCard);
+		MoveCard(enemyCard.gameObject, "PlayerHand", 3, 0);
+		player.hand.AddCard(enemyCard);
+	}
+	public void NothingForEnemy(){
+		board.thingInfoArea.text = "Nothing for Enemy";
+		List<ActionCard> enemyCards = enemy.hand.GetAllCards();
+		foreach(ActionCard card in enemyCards){
+			MoveCard(card.gameObject, "Graveyard", 4, 0);
+		}
+		enemyCards.Clear();
+	}
+	public void ReplaceAThing(){
+		board.thingInfoArea.text = "Replace a Thing";
+		List<ActionCard> playerCards = player.hand.GetAllCards();
+		if(playerCards.Count == 0){
+			return;
+		}
+		ActionCard card = playerCards[Random.Range(0, playerCards.Count)];
+		playerCards.Remove(card);
+		MoveCard(card.gameObject, "Graveyard", 3, 0.5f);
+		DealCard(0);
+	}
 }
