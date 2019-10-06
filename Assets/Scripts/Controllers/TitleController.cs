@@ -14,6 +14,7 @@ public class TitleController : MonoBehaviour {
 		
 	}
 	public void GoToScene(string sceneName){
+		AudioManager.instance.PlaySound("Button Click");
 		if(sceneName.Equals("Exit")){
 			Application.Quit();
 			return;

@@ -17,20 +17,20 @@ public class Thing : MonoBehaviour {
 		GameController.instance.ActivateThingPanel(false);
 		switch(display.cardName.text){
 			case "Nothing":
-				break;
+				return;
 			case "Something":
 				DeckManager.Data_Thing thing = DeckManager.instance.GetRandomThing();
 				SetData(thing.name, thing.description);
-				return;
+				break;
 			case "Anything":
 				GameController.instance.ActivateThingPanel(true);
 				break;
 			case "Get a Thing":
 				GameController.instance.GetAThing();
-				return;
+				break;
 			case "Swap a Thing":
 				GameController.instance.SwapAThing();
-				return;
+				break;
 			case "Replace a Thing":
 				GameController.instance.ReplaceAThing();
 				break;
@@ -44,13 +44,15 @@ public class Thing : MonoBehaviour {
 				GameController.instance.NothingForEnemy();
 				break;
 		}
-		display.cardName.text = "Nothing";
-		display.description.text = "There is nothing you can do with this card.";
-		interactable = false;
+		AudioManager.instance.PlaySound("Defensive Card");
 	}
 	
 	public void SetData(string name, string description){
 		display.cardName.text = name;
 		display.description.text = description;
+	}
+	public void SetToNothing(){
+		SetData("Nothing", "There is nothing you can do with this card.");
+		interactable = false;
 	}
 }

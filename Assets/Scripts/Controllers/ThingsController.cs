@@ -43,6 +43,7 @@ public class ThingsController : MonoBehaviour {
 		}
 	}
 	public void ReturnToTitle(){
+		AudioManager.instance.PlaySound("Button Click");
 		SceneManager.LoadScene("Title");
 	}
 }

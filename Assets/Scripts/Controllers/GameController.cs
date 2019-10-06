@@ -50,11 +50,11 @@ public class GameController : MonoBehaviour {
 	private Queue<CardMotion> motionQueue;
 	// Use this for initialization
 	void Start () {
-		player.hp = new Stat("HP", 20, true);
-		player.mp = new Stat("MP", 7, true);
+		player.hp = new Stat("HP", 22, true);
+		player.mp = new Stat("MP", 8, true);
 		player.hpBar.SetStat(player.hp);
 		player.mpBar.SetStat(player.mp);
-		enemy.hp = new Stat("HP", 14, true);
+		enemy.hp = new Stat("HP", 12, true);
 		enemy.mp = new Stat("MP", 7, true);
 		enemy.hpBar.SetStat(enemy.hp);
 		enemy.mpBar.SetStat(enemy.mp);
@@ -81,13 +81,16 @@ public class GameController : MonoBehaviour {
 			case GameState.DEAL_CARD:
 				round++;
 				// default mana regen
-				if(level > 2){
+				if(level > 5){
 					thing.SetData("Anything", "You can choose any thing you want.");
+					thing.interactable = true;
 				}
-				else if(level > 1){
+				else if(level > 2){
+					thing.interactable = true;
 					thing.SetData("Something", "Get a random thing.");
 				}else{
 					thing.SetData("Nothing", "There is nothing you can do with this card.");
+					thing.interactable = false;
 				}
 				player.mp.UpdateValue(5);
 				enemy.mp.UpdateValue(5);
@@ -100,7 +103,7 @@ public class GameController : MonoBehaviour {
 			case GameState.PLAYER_TURN:
 				text += "Your Turn";
 				if(enemy.hp.GetValue() <= 0){
-					if(level == 10){
+					if(level == 7){
 						victoryPanel.gameObject.SetActive(true);
 						curState = GameState.VICTORY;
 						return;
@@ -145,6 +148,9 @@ public class GameController : MonoBehaviour {
 		nextLevelBlock.gameObject.SetActive(true);
 		nextLevelText.gameObject.SetActive(true);
 		nextLevelText.text = "Level " + level;
+		if(level == 7){
+			nextLevelText.text = "Final Level";
+		}
 		float t0 = 0;
 		while(t0 < 1 && level != 1){
 			t0 += 0.05f * gameSpeed;
@@ -182,11 +188,13 @@ public class GameController : MonoBehaviour {
 	}
 	private void ClearTarget(Player target){
 		int extraHealth = level * 4;
+		int extraMana = level / 2;
 		if(target == player){
-			extraHealth += 6;
+			extraHealth += 10;
+			extraMana += 1;
 		}
-		target.hp.SetBestValue(10 + extraHealth);
-		target.mp.SetBestValue(6 + level);
+		target.hp.SetBestValue(8 + extraHealth);
+		target.mp.SetBestValue(6 + extraMana);
 		target.hp.SetValue(target.hp.GetBestValue());
 		target.mp.SetValue(target.mp.GetBestValue());
 		target.dodge = false;
@@ -207,7 +215,10 @@ public class GameController : MonoBehaviour {
 	public void DealCard(int target){
 		int count = Mathf.Min(round, 4);
 		if(target == 0){
-			count -= player.hand.GetCardCount() + 1;
+			count -= player.hand.GetCardCount();
+			if(round < 5){
+				count--;
+			}
 			//Debug.Log("Player " + target + " has " + player.hand.GetCardCount() + "cards.");
 		}else{
 			count -= enemy.hand.GetCardCount();
@@ -262,6 +273,7 @@ public class GameController : MonoBehaviour {
 				}
 				// apply effect
 				if(card.cardType.Equals("Offense")){
+					AudioManager.instance.PlaySound("Offensive Card");
 					if(opponent.dodge){
 						opponent.dodge = false;
 					}else if(opponent.dmgBlock > 0){
@@ -277,6 +289,7 @@ public class GameController : MonoBehaviour {
 						opponent.mp.UpdateValue(-card.enemyMPLoss);
 					}
 				}else{
+					AudioManager.instance.PlaySound("Support Card");
 					cardUser.hp.UpdateValue(card.selfHPRegen);
 					cardUser.mp.UpdateValue(card.selfMPRegen);
 					if(!cardUser.dodge){
@@ -307,6 +320,7 @@ public class GameController : MonoBehaviour {
 		if(curState == GameState.PLAYER_TURN){
 			curState = GameState.ENEMY_TURN;
 		}
+		AudioManager.instance.PlaySound("Button Click");
 		endTurnButton.SetActive(false);
 	}
 	public bool PlayerPlay(ActionCard card){
@@ -315,6 +329,7 @@ public class GameController : MonoBehaviour {
 		}
 		Data_ActionCard cardData = card.GetData();
 		if(curState == GameState.PLAYER_TURN && player.mp.GetValue() >= cardData.manaCost){
+			AudioManager.instance.PlaySound("Use Card");
 			card.interactable = false;
 			MoveCardCenter(card.gameObject, 2, 0.8f, true);
 			MoveCard(card.gameObject, "Graveyard", 2, 0.5f);
@@ -329,6 +344,7 @@ public class GameController : MonoBehaviour {
 	public bool EnemyPlay(ActionCard card){
 		Data_ActionCard cardData = card.GetData();
 		if(curState == GameState.ENEMY_TURN && enemy.mp.GetValue() >= cardData.manaCost){
+			AudioManager.instance.PlaySound("Use Card");
 			MoveCardCenter(card.gameObject, 2, 0.8f, true);
 			MoveCard(card.gameObject, "Graveyard", 2, 0.5f);
 			enemy.mp.UpdateValue(-cardData.manaCost);
@@ -390,6 +406,7 @@ public class GameController : MonoBehaviour {
 		thingPanel.SetActive(active);
 	}
 	public bool SwapAThing(){
+		thing.SetToNothing();
 		board.thingInfoArea.text = "Swap a Thing";
 		List<ActionCard> enemyCards = enemy.hand.GetAllCards();
 		List<ActionCard> playerCards = player.hand.GetAllCards();
@@ -409,6 +426,7 @@ public class GameController : MonoBehaviour {
 		return true;
 	}
 	public void DestroyAThing(){
+		thing.SetToNothing();
 		board.thingInfoArea.text = "Destroy a Thing";
 		List<ActionCard> enemyCards = enemy.hand.GetAllCards();
 		if(enemyCards.Count == 0){
@@ -420,10 +438,21 @@ public class GameController : MonoBehaviour {
 
 	}
 	public void GetAThing(){
+		thing.SetToNothing();
 		board.thingInfoArea.text = "Get a Thing";
-		DealCard(0);
+		GameObject cardObj = Instantiate(board.actionCardPrefab, board.deck.transform);
+		Data_ActionCard cardData = DeckManager.instance.DealActionCard();
+		ActionCard actionCard = cardObj.GetComponent<ActionCard>();
+		actionCard.SetData(cardData);
+		cardObj.SetActive(false);
+		actionCard.interactable = true;
+		MoveCard(cardObj, "PlayerHand", 2, 0.5f);
+		Debug.Log("Player has " + enemy.hand.GetCardCount() + " cards");
+		player.hand.AddCard(actionCard);
+		
 	}
 	public void StealAThing(){
+		thing.SetToNothing();
 		board.thingInfoArea.text = "Steal a Thing";
 		List<ActionCard> enemyCards = enemy.hand.GetAllCards();
 		if(enemyCards.Count == 0){
@@ -436,6 +465,7 @@ public class GameController : MonoBehaviour {
 		player.hand.AddCard(enemyCard);
 	}
 	public void NothingForEnemy(){
+		thing.SetToNothing();
 		board.thingInfoArea.text = "Nothing for Enemy";
 		List<ActionCard> enemyCards = enemy.hand.GetAllCards();
 		foreach(ActionCard card in enemyCards){
@@ -444,6 +474,7 @@ public class GameController : MonoBehaviour {
 		enemyCards.Clear();
 	}
 	public void ReplaceAThing(){
+		thing.SetToNothing();
 		board.thingInfoArea.text = "Replace a Thing";
 		List<ActionCard> playerCards = player.hand.GetAllCards();
 		if(playerCards.Count == 0){
@@ -452,10 +483,19 @@ public class GameController : MonoBehaviour {
 		ActionCard card = playerCards[Random.Range(0, playerCards.Count)];
 		playerCards.Remove(card);
 		MoveCard(card.gameObject, "Graveyard", 3, 0.5f);
-		DealCard(0);
+		GameObject cardObj = Instantiate(board.actionCardPrefab, board.deck.transform);
+		Data_ActionCard cardData = DeckManager.instance.DealActionCard();
+		ActionCard actionCard = cardObj.GetComponent<ActionCard>();
+		actionCard.SetData(cardData);
+		cardObj.SetActive(false);
+		actionCard.interactable = true;
+		MoveCard(cardObj, "PlayerHand", 2, 0.5f);
+		Debug.Log("Player has " + enemy.hand.GetCardCount() + " cards");
+		player.hand.AddCard(actionCard);
 	}
 	public void TitleScreen(){
 		SceneManager.LoadScene("Title");
+		AudioManager.instance.PlaySound("Button Click");
 	}
 	
 }
