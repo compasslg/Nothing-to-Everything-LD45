@@ -52,9 +52,8 @@ public class DeckManager : MonoBehaviour {
 	private void LoadActionCards(){
 		chances = new List<int>();
 		actionCards = new List<Data_ActionCard>();
-        StreamReader reader = new StreamReader("Assets/Data/actioncards.data");
-        string[] line = null;
-        reader.ReadLine().Split('\t');
+		TextAsset dataFile = Resources.Load<TextAsset>("Data/actioncards");
+		string[] lines = dataFile.text.Split('\n');
 		totalChance = 0;
 		int manaCost = 0;
 		int enemyHPLoss = 0;
@@ -63,10 +62,13 @@ public class DeckManager : MonoBehaviour {
 		int selfMPRegen = 0;
 		bool evasion = false;
 		int block = 0;
-        while(!reader.EndOfStream){
-            line = reader.ReadLine().Split('\t');
+		for(int i = 1; i < lines.Length; i++){
+			Debug.Log(i);
+			string[] line = lines[i].Split('\t');
+			if(line.Length != 10){
+				continue;
+			}
 			Sprite icon = Resources.Load<Sprite>("Sprites/" + line[0]);
-			//Sprite icon = Resources.Load<Sprite>("Sprites/white.png");
 			totalChance += Convert.ToInt32(line[3]);
 			manaCost = Convert.ToInt32(line[2]);
 			enemyHPLoss = Convert.ToInt32(line[4]);
@@ -82,6 +84,7 @@ public class DeckManager : MonoBehaviour {
 			Data_ActionCard card = new Data_ActionCard(line[0],icon, line[1], manaCost,enemyHPLoss,enemyMPLoss,selfHPRegen,selfMPRegen, evasion, block);
 			actionCards.Add(card);
 			chances.Add(totalChance);
+
 		}
 	}
 }

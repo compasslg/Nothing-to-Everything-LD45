@@ -17,7 +17,6 @@ public class StoryController : MonoBehaviour {
 	[SerializeField]private Text text;
 	// Use this for initialization
 	void Start () {
-		SceneManager.LoadScene("InGame");
 		index = 0;
 		t = 0;
 		background.sprite = story[0].img;
