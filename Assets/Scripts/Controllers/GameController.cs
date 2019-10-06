@@ -43,6 +43,8 @@ public class GameController : MonoBehaviour {
 	[SerializeField]private Player enemy;
 	[SerializeField]private GameObject thingPanel;
 	[SerializeField]private Thing thing;
+	[SerializeField]private Image nextLevelBlock;
+	[SerializeField]private Text nextLevelText;
 	private Queue<CardMotion> motionQueue;
 	// Use this for initialization
 	void Start () {
@@ -112,6 +114,38 @@ public class GameController : MonoBehaviour {
 		}
 		board.infoArea.text = text;
 	}
+
+
+	IEnumerator NextLevelUpdate(){
+		nextLevelBlock.gameObject.SetActive(true);
+		nextLevelText.gameObject.SetActive(true);
+		bool wait = true;
+		float t0 = 0;
+		while(t0 < 1){
+			t0 += 0.05f;
+			if(t0 > 1){
+				t0 = 1;
+			}
+			nextLevelBlock.color = (1 - t0) * Color.clear + Color.white;
+			nextLevelText.color = (1 - t0) * Color.clear + Color.white;
+			yield return new WaitForSeconds(0.05f);
+		}
+		yield return new WaitForSeconds(0.5f);
+		float t1 = 0;
+		while(t1 < 1){
+			t1 += 0.05f;
+			if(t1 > 1){
+				t1 = 1;
+			}
+			nextLevelBlock.color = (1 - t1) * Color.white + Color.clear;
+			nextLevelText.color = (1 - t1) * Color.clear + Color.clear;
+			yield return new WaitForSeconds(0.05f);
+		}
+		
+
+	}
+
+
 
 	private void UpdateStatusInfo(Player target){
 		string text = "";
